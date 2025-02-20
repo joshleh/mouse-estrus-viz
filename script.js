@@ -23,6 +23,23 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
+    // Add background shading for night periods
+    const dayLength = 1440; // 1440 minutes in a day
+    const numDays = d3.max(data, d => d.day);
+
+    // Append background shading for each night period
+    for (let i = 0; i < numDays; i++) {
+        if (i % 2 === 0) {
+            svg.append("rect")
+                .attr("x", xScale(i + 1))  // Start of night
+                .attr("y", margin.top)
+                .attr("width", xScale(i + 2) - xScale(i + 1)) // Ensure width is proportional to day
+                .attr("height", height - margin.bottom - margin.top)
+                .attr("fill", "lightgray")
+                .attr("opacity", 0.3);
+        }
+    }
+
     // Add X-axis Label
     svg.append("text")
         .attr("x", width / 2)
@@ -73,15 +90,25 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(yScale));
 
-    // Function to update the chart based on selected mouse
+    let zoomedRange = null;
+
     function updateChart(selectedMouse) {
         const filteredData = data.filter(d => d.mouse === selectedMouse);
     
-        // Reset xScale domain to the full range
-        xScale.domain(d3.extent(filteredData, d => d.day));
+        // Preserve zoom range if it exists
+        if (zoomedRange) {
+            xScale.domain(zoomedRange);
+        } else {
+            xScale.domain(d3.extent(filteredData, d => d.day));
+        }
     
-        // Update line
+        yScale.domain([d3.min(filteredData, d => d.temp) - 0.5, d3.max(filteredData, d => d.temp) + 0.5]);
+    
+        // Remove old line and circles
         svg.selectAll(".line").remove();
+        svg.selectAll("circle").remove();
+    
+        // Re-draw line
         svg.append("path")
             .datum(filteredData)
             .attr("fill", "none")
@@ -90,61 +117,65 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             .attr("class", "line")
             .attr("d", line);
     
-        // Update circles
-        svg.selectAll("circle").remove();
+        // Re-draw circles
         svg.selectAll("circle")
             .data(filteredData)
             .enter().append("circle")
             .attr("cx", d => xScale(d.day))
             .attr("cy", d => yScale(d.temp))
-            .attr("r", 2)  // Reduce circle size
-            .attr("fill", "red")
-            .on("mouseover", (event, d) => {
-                tooltip.style("display", "block")
-                    .style("left", event.pageX + "px")
-                    .style("top", event.pageY + "px")
-                    .html(`Day: ${d.day}<br>Temp: ${d.temp}`);
-            })
-            .on("mouseout", () => tooltip.style("display", "none"));
+            .attr("r", 2)
+            .attr("fill", "red");
     
-        // ** Re-add Axes **
+        // Re-add axes
         xAxis.call(d3.axisBottom(xScale));
         yAxis.call(d3.axisLeft(yScale));
     
-        // Reset brush selection
-        svg.select(".brush").call(brush.move, null);
+        // Only reset brush if zoomedRange is null
+        if (!zoomedRange) {
+            svg.select(".brush").call(brush.move, null);
+        }
     }
-
+    
+    svg.on("dblclick", function () {
+        zoomedRange = null; // Reset zoom globally
+        updateChart(dropdown.node().value);
+    });    
+        
     // Default selection (first mouse)
     updateChart(uniqueMice[0]);
 
-    // Listen for dropdown changes
+    // Ensure the dropdown correctly updates everything
     dropdown.on("change", function() {
-        updateChart(this.value);
+        const selectedMouse = this.value;
+        updateChart(selectedMouse);
     });
 
-    // Brush & Zoom
+
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
         .on("end", (event) => {
             const selection = event.selection;
             if (!selection) return;
-    
-            // Convert brush selection from pixels to data domain
+
+            // Convert selection from pixel space to data domain
             const [x0, x1] = selection.map(xScale.invert);
-    
-            // Update x-axis domain
+
+            // Update the domain
             xScale.domain([x0, x1]);
-    
+
             // Redraw elements
             svg.select(".line").attr("d", line);
             svg.selectAll("circle")
                 .attr("cx", d => xScale(d.day))
                 .attr("cy", d => yScale(d.temp));
-    
+
             xAxis.call(d3.axisBottom(xScale));
+
+            // Store the zoomed range globally
+            zoomedRange = [x0, x1];
         });
 
     // Add brush to the chart
     svg.append("g").attr("class", "brush").call(brush);
+
 });
