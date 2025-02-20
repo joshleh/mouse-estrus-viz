@@ -7,7 +7,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Set dimensions
     const width = 800, height = 400;
-    const margin = { top: 40, right: 30, bottom: 60, left: 70 };
+    const margin = { top: 40, right: 150, bottom: 60, left: 70 }; // Increased right margin
 
     // Create Scales
     let xScale = d3.scaleLinear()
@@ -56,7 +56,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Add Legend
     const legend = svg.append("g")
-        .attr("transform", `translate(${width - margin.right + 20}, ${margin.top})`);
+        .attr("transform", `translate(${width - margin.right + 30}, ${margin.top + 20})`); // Adjusted position
 
     // Nighttime color box
     legend.append("rect")
@@ -68,10 +68,16 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("opacity", 0.3);
 
     legend.append("text")
-        .attr("x", 30)
+        .attr("x", 25) // Adjusted from 30 to 25 for better alignment
         .attr("y", 15)
         .style("font-size", "12px")
         .text("Nighttime");
+    
+    legend.append("text")
+        .attr("x", 25) // Adjusted from 30 to 25 for better alignment
+        .attr("y", 45)
+        .style("font-size", "12px")
+        .text("Daytime");
 
     // Daytime color box
     legend.append("rect")
@@ -87,7 +93,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("y", 45)
         .style("font-size", "12px")
         .text("Daytime");
-            
+
     // Line Generator
     const line = d3.line()
         .x(d => xScale(d.day))
