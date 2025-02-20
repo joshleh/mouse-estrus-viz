@@ -185,10 +185,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
         .on("start", function () { 
-            d3.select(".brush").style("display", "block"); 
+            d3.select(".brush").style("display", "block").style("cursor", "crosshair"); 
         })
         .on("brush", function(event) { 
-            d3.select(".brush").style("display", "block"); 
+            d3.select(".brush").style("display", "block").style("cursor", "crosshair"); 
         })
         .on("end", (event) => {
             const selection = event.selection;
@@ -205,6 +205,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         });
 
     // Add brush to the chart
-    svg.append("g").attr("class", "brush").call(brush);
+    svg.append("g")
+        .attr("class", "brush")
+        .call(brush)
+        .style("cursor", "crosshair");
+
 
 });
