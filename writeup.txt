@@ -1,0 +1,16 @@
+Rationale for Design Decisions
+When designing this visualization, my primary goal was to create an intuitive and interactive way to explore temperature fluctuations in mice across different stages of the estrus cycle. Given the large dataset and the importance of identifying patterns over time, I opted for a scatter plot over time, as it effectively displays the cyclical trends in body temperature.
+
+To enhance usability, I incorporated several interactive features:
+- Dropdown selection: Allows users to switch between individual mice, making it easier to compare different subjects.
+- Brush & Zoom: Enables users to zoom in on specific timeframes for a closer look at short-term trends. I considered using sliders for filtering time periods but decided that brushing felt more natural for selecting time ranges.
+- Night vs. Day shading: I added alternating gray shading to indicate nighttime, providing a quick visual cue for correlating temperature changes with the light cycle. This helps users easily distinguish daily patterns without manually referencing timestamps.
+- Legend: To avoid confusion, I included a legend explaining the day/night shading. I adjusted the placement and spacing multiple times to ensure it didn’t overlap with the chart.
+I explored alternative visualization styles, such as line charts and heatmaps, but found that scatter plots better represented individual data points while still showing overall trends. Line charts tended to over-smooth the temperature variations, making it harder to detect fluctuations. Heatmaps, while useful for high-level overviews, lacked the granularity needed for analyzing individual data points.
+
+Ultimately, I settled on a scatter plot with interactive zoom and shading, as it struck the best balance between clarity, exploration, and detail.
+
+Development Process Overview
+The development process was highly iterative, involving multiple rounds of testing and refinement. I started by loading and cleaning the data, ensuring it was structured correctly for D3.js. Then, I focused on plotting the temperature data and aligning it with the time series. The interaction features—dropdown selection, brush zoom, and shading—were added in stages to ensure they worked smoothly together.
+One of the most time-consuming aspects was debugging interactive behaviors, particularly getting brush zoom to persist correctly when switching between mice. Another challenge was aligning the night/day shading so that it dynamically adjusted when zooming in and out. Small adjustments to scaling, margins, and legend placement also took significant time, as I wanted to ensure the visualization remained clear and uncluttered.
+Overall, I think it took me around 15 hours to complete this project. The project involved a lot of trial and error, but the result is an interactive and engaging visualization that allows for meaningful exploration of mouse temperature trends.

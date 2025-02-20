@@ -130,7 +130,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         zoomedRange = null;  
         xScale.domain(d3.extent(filteredData, d => d.day));
         yScale.domain([d3.min(filteredData, d => d.temp) - 0.5, d3.max(filteredData, d => d.temp) + 0.5]);
-    
+
         // Remove old line and circles
         svg.selectAll(".line").remove();
         svg.selectAll("circle").remove();
@@ -184,6 +184,12 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
+        .on("start", function () { 
+            d3.select(".brush").style("display", "block"); 
+        })
+        .on("brush", function(event) { 
+            d3.select(".brush").style("display", "block"); 
+        })
         .on("end", (event) => {
             const selection = event.selection;
             if (!selection) return;
@@ -200,6 +206,5 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Add brush to the chart
     svg.append("g").attr("class", "brush").call(brush);
-
 
 });

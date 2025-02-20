@@ -19,3 +19,7 @@ body {
     display: none;
     font-size: 14px;
 }
+
+.brush {
+    cursor: crosshair;
+}
