@@ -88,12 +88,6 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("fill", "white")
         .attr("stroke", "black");
 
-    legend.append("text")
-        .attr("x", 30)
-        .attr("y", 45)
-        .style("font-size", "12px")
-        .text("Daytime");
-
     // Line Generator
     const line = d3.line()
         .x(d => xScale(d.day))
