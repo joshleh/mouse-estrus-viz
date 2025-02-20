@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Estrus Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <div class="chart-container">
+        <h2>Mouse Temperature Trends Across Estrus Cycle</h2>
+        <select id="mouseSelector"></select>
+        <svg id="tempChart" width="800" height="400"></svg>
+
+        <h2>Activity Heatmap</h2>
+        <svg id="heatmap" width="800" height="400"></svg>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
