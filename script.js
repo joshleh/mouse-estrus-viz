@@ -7,7 +7,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Set dimensions
     const width = 800, height = 400;
-    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const margin = { top: 40, right: 30, bottom: 60, left: 70 };
 
     // Create Scales
     let xScale = d3.scaleLinear()
@@ -23,6 +23,23 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
+    // Add X-axis Label
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Day");
+
+    // Add Y-axis Label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Temperature (°C)");
+
     // Line Generator
     const line = d3.line()
         .x(d => xScale(d.day))
@@ -30,6 +47,12 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Get unique mouse IDs
     const uniqueMice = [...new Set(data.map(d => d.mouse))];
+
+    // Add Label for Dropdown
+    d3.select(".chart-container").insert("label", "#mouseSelector")
+        .attr("for", "mouseSelector")
+        .style("margin-right", "10px")
+        .text("Select Mouse:");
 
     // Populate dropdown
     const dropdown = d3.select("#mouseSelector");
@@ -53,10 +76,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     // Function to update the chart based on selected mouse
     function updateChart(selectedMouse) {
         const filteredData = data.filter(d => d.mouse === selectedMouse);
-
+    
         // Reset xScale domain to the full range
         xScale.domain(d3.extent(filteredData, d => d.day));
-
+    
         // Update line
         svg.selectAll(".line").remove();
         svg.append("path")
@@ -66,7 +89,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             .attr("stroke-width", 2)
             .attr("class", "line")
             .attr("d", line);
-
+    
         // Update circles
         svg.selectAll("circle").remove();
         svg.selectAll("circle")
@@ -74,7 +97,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             .enter().append("circle")
             .attr("cx", d => xScale(d.day))
             .attr("cy", d => yScale(d.temp))
-            .attr("r", 4)
+            .attr("r", 2)  // Reduce circle size
             .attr("fill", "red")
             .on("mouseover", (event, d) => {
                 tooltip.style("display", "block")
@@ -83,11 +106,11 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     .html(`Day: ${d.day}<br>Temp: ${d.temp}`);
             })
             .on("mouseout", () => tooltip.style("display", "none"));
-
+    
         // ** Re-add Axes **
         xAxis.call(d3.axisBottom(xScale));
         yAxis.call(d3.axisLeft(yScale));
-
+    
         // Reset brush selection
         svg.select(".brush").call(brush.move, null);
     }
@@ -103,22 +126,22 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     // Brush & Zoom
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
-        .on("brush end", (event) => {
+        .on("end", (event) => {
             const selection = event.selection;
             if (!selection) return;
-
+    
             // Convert brush selection from pixels to data domain
             const [x0, x1] = selection.map(xScale.invert);
-
+    
             // Update x-axis domain
             xScale.domain([x0, x1]);
-
+    
             // Redraw elements
             svg.select(".line").attr("d", line);
             svg.selectAll("circle")
                 .attr("cx", d => xScale(d.day))
                 .attr("cy", d => yScale(d.temp));
-
+    
             xAxis.call(d3.axisBottom(xScale));
         });
 
