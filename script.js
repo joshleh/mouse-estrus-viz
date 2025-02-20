@@ -43,7 +43,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("y", height - 20)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .text("Day");
+        .text("Day (Minutes)");
 
     // Add Y-axis Label
     svg.append("text")
@@ -54,6 +54,40 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .style("font-size", "14px")
         .text("Temperature (°C)");
 
+    // Add Legend
+    const legend = svg.append("g")
+        .attr("transform", `translate(${width - margin.right + 20}, ${margin.top})`);
+
+    // Nighttime color box
+    legend.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", "lightgray")
+        .attr("opacity", 0.3);
+
+    legend.append("text")
+        .attr("x", 30)
+        .attr("y", 15)
+        .style("font-size", "12px")
+        .text("Nighttime");
+
+    // Daytime color box
+    legend.append("rect")
+        .attr("x", 0)
+        .attr("y", 30)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", "white")
+        .attr("stroke", "black");
+
+    legend.append("text")
+        .attr("x", 30)
+        .attr("y", 45)
+        .style("font-size", "12px")
+        .text("Daytime");
+            
     // Line Generator
     const line = d3.line()
         .x(d => xScale(d.day))
