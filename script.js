@@ -97,10 +97,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function(event) {
+                    console.log("Brush event triggered");  // Debugging log
+                
                     const selection = event.selection;
                     if (!selection) return;
-                
-                    console.log("Brush event triggered");  // Debug log
                 
                     // Convert selection from pixel space to data domain
                     zoomedRange = selection.map(xScale.invert);
@@ -119,6 +119,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     // Hide the brush after zooming is applied
                     d3.select(".brush").call(brush.move, null);
                 });
+            
             
 
             if (selection) {
@@ -161,6 +162,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             // Update X-axis immediately
             xAxis.transition().duration(500).call(d3.axisBottom(xScale));
         });
+    
+    window.updateShading = updateShading;
 
     // Now append the brush AFTER defining it
     const brushGroup = svg.append("g")
