@@ -23,7 +23,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
-    function updateShading() {
+    function updateShading(zoomRange) {
         // Remove all previous shading elements
         svg.selectAll(".night-shading").remove();
     
@@ -35,8 +35,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             const nightEnd = (i + 1) * dayLength;
     
             // Ensure shading is only drawn within the zoomed range
-            const clippedNightStart = Math.max(nightStart, xScale.domain()[0]);
-            const clippedNightEnd = Math.min(nightEnd, xScale.domain()[1]);
+            const clippedNightStart = Math.max(nightStart, zoomRange[0]);
+            const clippedNightEnd = Math.min(nightEnd, zoomRange[1]);
     
             if (clippedNightStart < clippedNightEnd) {
                 svg.append("rect")
@@ -50,7 +50,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             }
         }
     }
-
+        
     // Add X-axis Label
     svg.append("text")
         .attr("x", width / 2)
@@ -99,7 +99,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             // Update the X-axis with zoom transition
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    updateShading(); // Ensure shading updates AFTER zoom is completed
+                    updateShading(xScale.domain()); // Pass zoomed range to shading function
                 });
 
             if (selection) {
