@@ -25,9 +25,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Append background shading for each night period
     function updateShading() {
-        // Remove old shading
-        svg.selectAll(".night-shading").remove();
-    
+        // Ensure all previous shading is fully removed
+        svg.selectAll(".night-shading").transition().duration(100).style("opacity", 0).remove();
+
         const dayLength = 1440; // Minutes in a day
         const numDays = Math.ceil(d3.max(data, d => d.day) / dayLength);
     
@@ -35,19 +35,23 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             const nightStart = i * dayLength + 720; // Night starts at 720 minutes
             const nightEnd = (i + 1) * dayLength;
     
-            // Ensure shading is within zoom range
-            if (nightEnd < xScale.domain()[0] || nightStart > xScale.domain()[1]) {
-                continue; // Ignore if shading is outside zoom range
+            // Remove previous shading before updating
+            svg.selectAll(".night-shading").remove(); 
+
+            // Ensure shading is only drawn within the zoomed range
+            const clippedNightStart = Math.max(nightStart, xScale.domain()[0]);
+            const clippedNightEnd = Math.min(nightEnd, xScale.domain()[1]);
+
+            if (clippedNightStart < clippedNightEnd) {
+                svg.append("rect")
+                    .attr("class", "night-shading")
+                    .attr("x", xScale(clippedNightStart))
+                    .attr("y", margin.top)
+                    .attr("width", Math.max(0, xScale(clippedNightEnd) - xScale(clippedNightStart)))
+                    .attr("height", height - margin.bottom - margin.top)
+                    .attr("fill", "lightgray")
+                    .attr("opacity", 0.3);
             }
-            
-            svg.append("rect")
-                .attr("class", "night-shading")
-                .attr("x", Math.max(margin.left, xScale(nightStart))) // Ensures shading starts within bounds
-                .attr("y", margin.top)
-                .attr("width", Math.max(0, xScale(nightEnd) - xScale(nightStart))) // Ensures correct width
-                .attr("height", height - margin.bottom - margin.top)
-                .attr("fill", "lightgray")
-                .attr("opacity", 0.3); 
         }
     }
 
@@ -87,23 +91,33 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             // Update the domain
             xScale.domain(zoomedRange);
         
-            // Delay X-axis update slightly to ensure data updates first
-            setTimeout(() => {
-                xAxis.transition().duration(500).call(d3.axisBottom(xScale));
-            }, 100);
+            // Update X-axis immediately
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
 
-            svg.selectAll(".night-shading").remove(); // Clear previous shading
-            updateShading(); // Apply updated shading
+           // Remove old shading elements
+            svg.selectAll(".night-shading").transition().duration(100).style("opacity", 0).remove();
 
+            // Apply updated shading
+            setTimeout(updateShading, 100);
 
-            // Update chart with zoomed data
-            updateChart(dropdown.node().value);
+            if (selection) {
+                zoomedRange = selection.map(xScale.invert);
+            } else {
+                zoomedRange = d3.extent(data, d => d.day);
+            }
+            xScale.domain(zoomedRange);
+
+            const selectedMouse = dropdown.node().value;
 
             // Ensure xScale domain is updated before filtering data
             const newFilteredData = data.filter(d => 
-                d.mouse === dropdown.node().value &&
-                d.day >= xScale.domain()[0] && d.day <= xScale.domain()[1]
+                d.mouse === selectedMouse &&
+                d.day >= zoomedRange[0] && d.day <= zoomedRange[1]
             );
+
+            // Remove old line and circles
+            svg.selectAll(".line").remove();
+            svg.selectAll("circle").remove();
 
             // Re-draw line with updated data
             svg.append("path")
@@ -122,11 +136,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                 .attr("cy", d => yScale(d.temp))
                 .attr("r", 2)
                 .attr("fill", "red");
-        
-            // Keep the brush selection active longer
-            setTimeout(() => {
-                d3.select(this).transition().duration(500).call(brush.move, selection);
-            }, 500);
+
+            // Update X-axis immediately
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
         });
 
     // Now append the brush AFTER defining it
@@ -260,13 +272,18 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     }
     
     svg.on("dblclick", function () {
-        zoomedRange = null; // Reset zoom globally
-        xScale.domain(d3.extent(data, d => d.day)); // Reset domain
-    
-        // Reset X-axis and update the chart
+        // Fully reset zoom
+        zoomedRange = null;
+        xScale.domain(d3.extent(data, d => d.day));
+        yScale.domain([d3.min(data, d => d.temp) - 0.5, d3.max(data, d => d.temp) + 0.5]);
+
+        // Reset X and Y axes
         xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+        yAxis.transition().duration(500).call(d3.axisLeft(yScale));
+
+        // Update the chart
         updateChart(dropdown.node().value);
-    
+
         // Clear the brush selection completely
         svg.select(".brush").call(brush.move, null);
     });

@@ -31,7 +31,7 @@ body {
 }
 
 .brush .selection {
-    fill: rgba(0, 0, 255, 0.2); /* Slightly lighter blue for better visibility */
+    fill: rgba(100, 100, 100, 0.2); /* Light gray for better contrast */
     stroke: none;
     pointer-events: all;
 }
