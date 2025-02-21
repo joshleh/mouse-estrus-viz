@@ -75,53 +75,86 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         })
         .on("brush", function(event) { 
             d3.select(".brush").style("display", "block");
-        })
-        .on("end", (event) => {
+        }).on("end", function(event) {
+            console.log("Brush event triggered");
+        
             const selection = event.selection;
-            if (!selection) return;
-            
-            // Hide brush selection after zooming is applied
-            d3.select(".brush").call(brush.move, null);
-
+            if (!selection) {
+                console.log("No selection made, returning...");
+                return;
+            }
+        
             // Convert selection from pixel space to data domain
             zoomedRange = selection.map(xScale.invert);
+            console.log("New zoom range:", zoomedRange);
         
-            // Update the domain
             xScale.domain(zoomedRange);
         
-            // Update X-axis immediately
-            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
-
-            // Ensure old shading is removed BEFORE zoom updates
+            // Remove old shading before updating zoom
             svg.selectAll(".night-shading").remove();
-
+        
+            // Update X-axis and ensure shading is updated afterward
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
-                .on("end", function(event) {
-                    console.log("Brush event triggered");
-                
-                    const selection = event.selection;
-                    if (!selection) return;
-                
-                    // Convert selection from pixel space to data domain
-                    zoomedRange = selection.map(xScale.invert);
-                    xScale.domain(zoomedRange);
-                
-                    // Remove old shading before updating zoom
-                    svg.selectAll(".night-shading").remove();
-                
-                    // Update X-axis and ensure shading is updated afterward
-                    xAxis.transition().duration(500).call(d3.axisBottom(xScale))
-                        .on("end", function() {
-                            console.log("X-axis transition complete, calling updateShading()");
-                            updateShading();  // Now shading updates after zoom is fully applied
-                        });
-                
-                    // Ensure `updateShading()` runs even if transition doesn't complete
-                    setTimeout(updateShading, 600); // Extra safeguard
-                
-                    // Hide the brush after zooming is applied
-                    d3.select(".brush").call(brush.move, null);
+                .on("end", function() {
+                    console.log("X-axis transition complete, calling updateShading()");
+                    updateShading();  // Ensures shading updates after zoom
                 });
+        
+            // Extra safeguard: Force updateShading even if transition fails
+            setTimeout(() => {
+                console.log("Force-calling updateShading() after timeout");
+                updateShading();
+            }, 600);
+        
+            // Hide the brush after zooming is applied
+            d3.select(".brush").call(brush.move, null);
+        });        
+        // .on("end", (event) => {
+        //     const selection = event.selection;
+        //     if (!selection) return;
+            
+        //     // Hide brush selection after zooming is applied
+        //     d3.select(".brush").call(brush.move, null);
+
+        //     // Convert selection from pixel space to data domain
+        //     zoomedRange = selection.map(xScale.invert);
+        
+        //     // Update the domain
+        //     xScale.domain(zoomedRange);
+        
+        //     // Update X-axis immediately
+        //     xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+
+        //     // Ensure old shading is removed BEFORE zoom updates
+        //     svg.selectAll(".night-shading").remove();
+
+        //     xAxis.transition().duration(500).call(d3.axisBottom(xScale))
+        //         .on("end", function(event) {
+        //             console.log("Brush event triggered");
+                
+        //             const selection = event.selection;
+        //             if (!selection) return;
+                
+        //             // Convert selection from pixel space to data domain
+        //             zoomedRange = selection.map(xScale.invert);
+        //             xScale.domain(zoomedRange);
+                
+        //             // Remove old shading before updating zoom
+        //             svg.selectAll(".night-shading").remove();
+                
+        //             // Update X-axis and ensure shading is updated afterward
+        //             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
+        //                 .on("end", function() {
+        //                     console.log("X-axis transition complete, calling updateShading()");
+        //                     updateShading();  // Now shading updates after zoom is fully applied
+        //                 });
+                
+        //             // Ensure `updateShading()` runs even if transition doesn't complete
+        //             setTimeout(updateShading, 600); // Extra safeguard
+                
+        //             // Hide the brush after zooming is applied
+        //             d3.select(".brush").call(brush.move, null);
+        //         });
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
