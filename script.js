@@ -80,7 +80,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .on("end", (event) => {
             const selection = event.selection;
             if (!selection) return;
-        
+            
+            // Hide brush selection after zooming is applied
+            d3.select(".brush").call(brush.move, null);
+
             // Convert selection from pixel space to data domain
             zoomedRange = selection.map(xScale.invert);
         

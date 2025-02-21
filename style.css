@@ -31,9 +31,10 @@ body {
 }
 
 .brush .selection {
-    fill: rgba(60, 60, 60, 0.2); /* Darker gray for clearer contrast */
+    fill: rgba(60, 60, 60, 0.2); /* Darker gray */
     stroke: none;
     pointer-events: all;
+    transition: opacity 0.2s ease-in-out; /* Faster fade-out */
 }
 
 /* Ensure the brush is always clickable */
