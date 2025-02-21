@@ -46,6 +46,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     .attr("opacity", 0.4);
             }
         }
+        console.log("New xScale domain:", xScale.domain());
     }
         
     // Add X-axis Label
@@ -102,7 +103,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     zoomedRange = selection.map(xScale.invert);
                     xScale.domain(zoomedRange);
                 
-                    // Remove existing shading immediately
+                    // Ensure old shading is removed before zoom updates
                     svg.selectAll(".night-shading").remove();
                 
                     // Update X-axis with a smooth transition
@@ -113,7 +114,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                 
                     // Hide the brush after zooming is applied
                     d3.select(".brush").call(brush.move, null);
-                });       
+                });
+            
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
