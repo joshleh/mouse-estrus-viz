@@ -23,7 +23,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
-    function updateShading(zoomRange = xScale.domain()) {
+    function updateShading(zoomRange) {
+        if (!zoomRange) zoomRange = xScale.domain(); // Ensure it always has a valid range
         svg.selectAll(".night-shading").remove();
         
         const dayLength = 1440; // Minutes in a day
@@ -297,14 +298,15 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         const selectedMouse = this.value;
         zoomedRange = null; // Reset zoom when changing mouse
     
-        // Clear all previous night/day shading before updating chart
+        // Clear old night shading
         svg.selectAll(".night-shading").remove();
-
+    
         // Reset brush selection
         svg.selectAll(".brush").call(brush.move, null);
     
         updateChart(selectedMouse);
-    });
+        updateShading(xScale.domain()); // Ensure shading updates when switching mice
+    });    
     
     // Ensure the first mouse loads correctly
     const firstMouse = uniqueMice[0]; // Get the first mouse in the dataset
