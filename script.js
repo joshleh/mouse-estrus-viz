@@ -95,8 +95,20 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    setTimeout(() => updateShading(), 100); // Small delay ensures xScale is fully updated
+                    const selection = event.selection;
+                    if (!selection) return;
+                
+                    d3.select(".brush").call(brush.move, null);  // Clear brush
+                
+                    zoomedRange = selection.map(xScale.invert); // Convert to data space
+                    xScale.domain(zoomedRange);
+                
+                    xAxis.transition().duration(500).call(d3.axisBottom(xScale))
+                        .on("end", function() {
+                            updateShading(); // Remove delay and call immediately
+                        });
                 });
+            
         
 
 
