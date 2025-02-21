@@ -93,15 +93,14 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             // Update X-axis immediately
             xAxis.transition().duration(500).call(d3.axisBottom(xScale));
 
-            // Remove old shading elements and ensure updateShading runs AFTER x-axis update
+            // Ensure old shading is removed BEFORE zoom updates
             svg.selectAll(".night-shading").remove();
+
+            // Update the X-axis with zoom transition
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    svg.selectAll(".night-shading").remove(); // Ensure old shading is fully removed
-                    updateShading(); // Update shading after zoom is completed
+                    updateShading(); // Ensure shading updates AFTER zoom is completed
                 });
-
-        
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
