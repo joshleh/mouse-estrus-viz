@@ -97,7 +97,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function(event) {
-                    console.log("Brush event triggered");  // Debugging log
+                    console.log("Brush event triggered");
                 
                     const selection = event.selection;
                     if (!selection) return;
@@ -116,11 +116,12 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                             updateShading();  // Now shading updates after zoom is fully applied
                         });
                 
+                    // Ensure `updateShading()` runs even if transition doesn't complete
+                    setTimeout(updateShading, 600); // Extra safeguard
+                
                     // Hide the brush after zooming is applied
                     d3.select(".brush").call(brush.move, null);
                 });
-            
-            
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
