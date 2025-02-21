@@ -45,7 +45,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     .attr("y", margin.top)
                     .attr("width", Math.max(0, xScale(clippedNightEnd) - xScale(clippedNightStart)))
                     .attr("height", height - margin.bottom - margin.top)
-                    .attr("fill", "rgba(169, 169, 169, 0.4)")  // Light gray with transparency
+                    .attr("fill", "rgba(50, 50, 50, 0.6)")  // Darker gray for better contrast
                     .attr("opacity", 0.4);
             }
         }
@@ -144,27 +144,30 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Add Legend
     const legend = svg.append("g")
-        .attr("transform", `translate(${width - margin.right + 30}, ${margin.top + 20})`); // Adjusted position
+        .attr("transform", `translate(${width - margin.right + 50}, ${margin.top + 50})`);
 
-    // Nighttime color box
+
+    // Nighttime color box (now matches darker shading)
     legend.append("rect")
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", 20)
         .attr("height", 20)
-        .attr("fill", "lightgray")
-        .attr("opacity", 0.3);
+        .attr("fill", "rgba(50, 50, 50, 0.6)")
+        .attr("opacity", 1);
 
     legend.append("text")
-        .attr("x", 25) // Adjusted from 30 to 25 for better alignment
+        .attr("x", 30)
         .attr("y", 15)
-        .style("font-size", "12px")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
         .text("Nighttime");
     
     legend.append("text")
-        .attr("x", 25) // Adjusted from 30 to 25 for better alignment
-        .attr("y", 45)
-        .style("font-size", "12px")
+        .attr("x", 30)
+        .attr("y", 55) // Increased spacing for better readability
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
         .text("Daytime");
 
     // Daytime color box
@@ -298,12 +301,12 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         updateChart(selectedMouse);
     });
     
-    // Ensure the chart starts with full data range
+    // Ensure the first mouse loads correctly
+    const firstMouse = uniqueMice[0]; // Get the first mouse in the dataset
     zoomedRange = d3.extent(data, d => d.day);
-    updateChart();
+    updateChart(firstMouse);
     xScale.domain(zoomedRange);
     xAxis.call(d3.axisBottom(xScale));
-
     
     // Move the brush to the top so it's above other elements
     brushGroup.raise();
