@@ -24,7 +24,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("height", height);
 
     function updateShading() {
-        const zoomRange = xScale.domain(); // Always get the latest zoom range
+        console.log("updateShading() called");  // Debug log
+        const zoomRange = xScale.domain();
+        console.log("New xScale domain:", zoomRange);  // Log scale domain
+    
         svg.selectAll(".night-shading").remove();
     
         const dayLength = 1440; // Minutes in a day
@@ -34,7 +37,6 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             const nightStart = i * dayLength + 720; // Night starts at 720 minutes
             const nightEnd = (i + 1) * dayLength;
     
-            // Ensure shading is only drawn within the zoomed range
             if (nightEnd >= zoomRange[0] && nightStart <= zoomRange[1]) {
                 svg.append("rect")
                     .attr("class", "night-shading")
@@ -46,7 +48,6 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     .attr("opacity", 0.4);
             }
         }
-        console.log("New xScale domain:", xScale.domain());
     }
         
     // Add X-axis Label
@@ -99,17 +100,20 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     const selection = event.selection;
                     if (!selection) return;
                 
+                    console.log("Brush event triggered");  // Debug log
+                
                     // Convert selection from pixel space to data domain
                     zoomedRange = selection.map(xScale.invert);
                     xScale.domain(zoomedRange);
                 
-                    // Ensure old shading is removed before zoom updates
+                    // Remove old shading before updating zoom
                     svg.selectAll(".night-shading").remove();
                 
-                    // Update X-axis with a smooth transition
+                    // Update X-axis and ensure shading is updated afterward
                     xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                         .on("end", function() {
-                            updateShading(); // Ensure shading updates AFTER the axis transition
+                            console.log("X-axis transition complete, calling updateShading()");
+                            updateShading();  // Now shading updates after zoom is fully applied
                         });
                 
                     // Hide the brush after zooming is applied
