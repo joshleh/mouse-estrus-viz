@@ -97,9 +97,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             svg.selectAll(".night-shading").remove();
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    svg.selectAll(".night-shading").remove(); // Remove old shading
-                    setTimeout(updateShading, 300); // Delay shading update for smoother transition
+                    svg.selectAll(".night-shading").remove(); // Ensure old shading is fully removed
+                    updateShading(); // Update shading after zoom is completed
                 });
+
         
 
             if (selection) {
@@ -158,7 +159,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("y", 0)
         .attr("width", 20)
         .attr("height", 20)
-        .attr("fill", "rgba(50, 50, 50, 0.6)")
+        .attr("fill", "rgba(30, 30, 30, 0.7)")
         .attr("opacity", 1);
 
     legend.append("text")
