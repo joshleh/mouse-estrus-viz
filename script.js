@@ -181,14 +181,20 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Default selection (first mouse)
     updateChart(uniqueMice[0]);
-    
+
+    // Append brush *before* drawing the data
+    const brushGroup = svg.append("g")
+        .attr("class", "brush")
+        .style("cursor", "crosshair");
+
+    // Add brush interaction
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
         .on("start", function () { 
-            d3.select(".brush").style("display", "block").style("cursor", "crosshair"); 
+            brushGroup.style("display", "block");
         })
         .on("brush", function(event) { 
-            d3.select(".brush").style("display", "block").style("cursor", "crosshair"); 
+            brushGroup.style("display", "block");
         })
         .on("end", (event) => {
             const selection = event.selection;
@@ -204,11 +210,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             updateChart(dropdown.node().value);
         });
 
-    // Add brush to the chart
-    svg.append("g")
-        .attr("class", "brush")
-        .call(brush)
-        .style("cursor", "crosshair");
-
+    // Apply the brush to the brush group
+    brushGroup.call(brush);
 
 });
