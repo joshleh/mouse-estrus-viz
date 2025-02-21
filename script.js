@@ -94,23 +94,26 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             svg.selectAll(".night-shading").remove();
 
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
-                .on("end", function() {
+                .on("end", function(event) {
                     const selection = event.selection;
                     if (!selection) return;
                 
-                    d3.select(".brush").call(brush.move, null);  // Clear brush
-                
-                    zoomedRange = selection.map(xScale.invert); // Convert to data space
+                    // Convert selection from pixel space to data domain
+                    zoomedRange = selection.map(xScale.invert);
                     xScale.domain(zoomedRange);
                 
+                    // Remove existing shading immediately
+                    svg.selectAll(".night-shading").remove();
+                
+                    // Update X-axis with a smooth transition
                     xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                         .on("end", function() {
-                            updateShading(); // Remove delay and call immediately
+                            updateShading(); // Ensure shading updates AFTER the axis transition
                         });
-                });
-            
-        
-
+                
+                    // Hide the brush after zooming is applied
+                    d3.select(".brush").call(brush.move, null);
+                });       
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
