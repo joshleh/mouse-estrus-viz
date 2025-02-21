@@ -67,113 +67,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .style("font-size", "14px")
         .text("Temperature (°C)");
     
-    // // Define the brush first
-    // const brush = d3.brushX()
-    //     .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
-    //     .on("start", function () { 
-    //         d3.select(".brush").style("display", "block");
-    //     })
-    //     .on("brush", function(event) { 
-    //         d3.select(".brush").style("display", "block");
-    //     })
-    //     .on("end", (event) => {
-    //         const selection = event.selection;
-    //         if (!selection) return;
-            
-    //         // Hide brush selection after zooming is applied
-    //         d3.select(".brush").call(brush.move, null);
-
-    //         // Convert selection from pixel space to data domain
-    //         zoomedRange = selection.map(xScale.invert);
-        
-    //         // Update the domain
-    //         xScale.domain(zoomedRange);
-        
-    //         // Update X-axis immediately
-    //         xAxis.transition().duration(500).call(d3.axisBottom(xScale));
-
-    //         // Ensure old shading is removed BEFORE zoom updates
-    //         svg.selectAll(".night-shading").remove();
-
-    //         xAxis.transition().duration(500).call(d3.axisBottom(xScale))
-    //             .on("end", function(event) {
-    //                 console.log("Brush event triggered");
-                
-    //                 const selection = event.selection;
-    //                 if (!selection) {
-    //                     console.log("No selection made, returning...");
-    //                     return;
-    //                 }
-                
-    //                 // Convert selection from pixel space to data domain
-    //                 zoomedRange = selection.map(xScale.invert);
-    //                 console.log("New zoom range:", zoomedRange);
-                
-    //                 xScale.domain(zoomedRange);
-                
-    //                 // Remove old shading before updating zoom
-    //                 svg.selectAll(".night-shading").remove();
-                
-    //                 // Update X-axis and ensure shading is updated afterward
-    //                 xAxis.transition().duration(500).call(d3.axisBottom(xScale))
-    //                     .on("end", function() {
-    //                         console.log("X-axis transition complete, calling updateShading()");
-    //                         updateShading();  // Ensures shading updates after zoom
-    //                     });
-                
-    //                 // Extra safeguard: Force updateShading even if transition fails
-    //                 setTimeout(() => {
-    //                     console.log("Force-calling updateShading() after timeout");
-    //                     updateShading();
-    //                 }, 600);
-                
-    //                 // Hide the brush after zooming is applied
-    //                 d3.select(".brush").call(brush.move, null);
-    //             });
-            
-    //         if (selection) {
-    //             zoomedRange = selection.map(xScale.invert);
-    //         } else {
-    //             zoomedRange = d3.extent(data, d => d.day);
-    //         }
-    //         xScale.domain(zoomedRange);
-
-    //         const selectedMouse = dropdown.node().value;
-
-    //         // Ensure xScale domain is updated before filtering data
-    //         const newFilteredData = data.filter(d => 
-    //             d.mouse === selectedMouse &&
-    //             d.day >= zoomedRange[0] && d.day <= zoomedRange[1]
-    //         );
-
-    //         // Remove old line and circles
-    //         svg.selectAll(".line").remove();
-    //         svg.selectAll("circle").remove();
-
-    //         // Re-draw line with updated data
-    //         svg.append("path")
-    //             .datum(newFilteredData)
-    //             .attr("fill", "none")
-    //             .attr("stroke", "steelblue")
-    //             .attr("stroke-width", 2)
-    //             .attr("class", "line")
-    //             .attr("d", line);
-
-    //         // Re-draw circles with updated data
-    //         svg.selectAll("circle")
-    //             .data(newFilteredData)
-    //             .enter().append("circle")
-    //             .attr("cx", d => xScale(d.day))
-    //             .attr("cy", d => yScale(d.temp))
-    //             .attr("r", 2)
-    //             .attr("fill", "red");
-
-    //         // Update X-axis immediately
-    //         xAxis.transition().duration(500).call(d3.axisBottom(xScale));
-    //     });
-
-    ///
-    
+    // Define the brush first
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
         .on("start", function () { 
@@ -182,84 +76,102 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .on("brush", function(event) { 
             d3.select(".brush").style("display", "block");
         })
-        .on("end", function(event) {
-            console.log("Brush event triggered");
-        
+        .on("end", (event) => {
             const selection = event.selection;
-            if (!selection) {
-                console.log("No selection made, returning...");
-                return;
-            }
-        
+            if (!selection) return;
+            
+            // Hide brush selection after zooming is applied
+            d3.select(".brush").call(brush.move, null);
+
             // Convert selection from pixel space to data domain
             zoomedRange = selection.map(xScale.invert);
-            console.log("New zoom range:", zoomedRange);
         
+            // Update the domain
             xScale.domain(zoomedRange);
         
-            // Remove old shading before updating zoom
+            // Update X-axis immediately
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+
+            // Ensure old shading is removed BEFORE zoom updates
             svg.selectAll(".night-shading").remove();
-        
-            // Update X-axis and ensure shading is updated afterward
+
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
-                .on("end", function() {
-                    console.log("X-axis transition complete, calling updateShading()");
-                    updateShading();  // Ensures shading updates after zoom
+                .on("end", function(event) {
+                    console.log("Brush event triggered");
+                
+                    const selection = event.selection;
+                    if (!selection) {
+                        console.log("No selection made, returning...");
+                        return;
+                    }
+                
+                    // Convert selection from pixel space to data domain
+                    zoomedRange = selection.map(xScale.invert);
+                    console.log("New zoom range:", zoomedRange);
+                
+                    xScale.domain(zoomedRange);
+                
+                    // Remove old shading before updating zoom
+                    svg.selectAll(".night-shading").remove();
+                
+                    // Update X-axis and ensure shading is updated afterward
+                    xAxis.transition().duration(500).call(d3.axisBottom(xScale))
+                        .on("end", function() {
+                            console.log("X-axis transition complete, calling updateShading()");
+                            updateShading();  // Ensures shading updates after zoom
+                        });
+                
+                    // Extra safeguard: Force updateShading even if transition fails
+                    setTimeout(() => {
+                        console.log("Force-calling updateShading() after timeout");
+                        updateShading();
+                    }, 600);
+                
+                    // Hide the brush after zooming is applied
+                    d3.select(".brush").call(brush.move, null);
                 });
-        
-            // Extra safeguard: Force updateShading even if transition fails
-            setTimeout(() => {
-                console.log("Force-calling updateShading() after timeout");
-                updateShading();
-            }, 600);
-        
-            // Hide the brush after zooming is applied
-            d3.select(".brush").call(brush.move, null);
+            
+            if (selection) {
+                zoomedRange = selection.map(xScale.invert);
+            } else {
+                zoomedRange = d3.extent(data, d => d.day);
+            }
+            xScale.domain(zoomedRange);
+
+            const selectedMouse = dropdown.node().value;
+
+            // Ensure xScale domain is updated before filtering data
+            const newFilteredData = data.filter(d => 
+                d.mouse === selectedMouse &&
+                d.day >= zoomedRange[0] && d.day <= zoomedRange[1]
+            );
+
+            // Remove old line and circles
+            svg.selectAll(".line").remove();
+            svg.selectAll("circle").remove();
+
+            // Re-draw line with updated data
+            svg.append("path")
+                .datum(newFilteredData)
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 2)
+                .attr("class", "line")
+                .attr("d", line);
+
+            // Re-draw circles with updated data
+            svg.selectAll("circle")
+                .data(newFilteredData)
+                .enter().append("circle")
+                .attr("cx", d => xScale(d.day))
+                .attr("cy", d => yScale(d.temp))
+                .attr("r", 2)
+                .attr("fill", "red");
+
+            // Update X-axis immediately
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
         });
-    
-        if (selection) {
-            zoomedRange = selection.map(xScale.invert);
-        } else {
-            zoomedRange = d3.extent(data, d => d.day);
-        }
 
-        xScale.domain(zoomedRange);
-
-        const selectedMouse = dropdown.node().value;
-
-        // Ensure xScale domain is updated before filtering data
-        const newFilteredData = data.filter(d => 
-            d.mouse === selectedMouse &&
-            d.day >= zoomedRange[0] && d.day <= zoomedRange[1]
-        );
-
-        // Remove old line and circles
-        svg.selectAll(".line").remove();
-        svg.selectAll("circle").remove();
-
-        // Re-draw line with updated data
-        svg.append("path")
-            .datum(newFilteredData)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-width", 2)
-            .attr("class", "line")
-            .attr("d", line);
-
-        // Re-draw circles with updated data
-        svg.selectAll("circle")
-            .data(newFilteredData)
-            .enter().append("circle")
-            .attr("cx", d => xScale(d.day))
-            .attr("cy", d => yScale(d.temp))
-            .attr("r", 2)
-            .attr("fill", "red");
-
-        // Update X-axis immediately
-        xAxis.transition().duration(500).call(d3.axisBottom(xScale));
-    });
-    
-    ///
     window.updateShading = updateShading;
 
     // Now append the brush AFTER defining it
