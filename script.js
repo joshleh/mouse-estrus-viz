@@ -53,6 +53,42 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .text("Temperature (°C)");
+    
+    // Define the brush first
+    const brush = d3.brushX()
+        .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
+        .on("start", function () { 
+            d3.select(".brush").style("display", "block");
+        })
+        .on("brush", function(event) { 
+            d3.select(".brush").style("display", "block");
+        })
+        .on("end", (event) => {
+            const selection = event.selection;
+            if (!selection) return;
+        
+            // Convert selection from pixel space to data domain
+            zoomedRange = selection.map(xScale.invert);
+        
+            // Update the domain
+            xScale.domain(zoomedRange);
+        
+            // Update the X-axis first
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+        
+            // Re-draw everything
+            updateChart(dropdown.node().value);
+        
+            // Keep the brush selection active longer
+            setTimeout(() => {
+                d3.select(this).transition().duration(500).call(brush.move, selection);
+            }, 500);
+        });
+
+    // Now append the brush AFTER defining it
+    const brushGroup = svg.append("g")
+        .attr("class", "brush")
+        .call(brush);
 
     // Add Legend
     const legend = svg.append("g")
@@ -121,8 +157,6 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(yScale));
 
-    let zoomedRange = null;
-
     function updateChart(selectedMouse) {
         const filteredData = data.filter(d => d.mouse === selectedMouse);
         
@@ -157,16 +191,21 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         xAxis.call(d3.axisBottom(xScale));
         yAxis.call(d3.axisLeft(yScale));
     
-        // **Ensure full brush reset when switching mice**
-        svg.select(".brush").call(brush.move, null);
+        svg.select(".brush").call(brush.move, null); // Reset immediately before updating chart
     }
     
     svg.on("dblclick", function () {
         zoomedRange = null; // Reset zoom globally
         xScale.domain(d3.extent(data, d => d.day)); // Reset domain
-        updateChart(dropdown.node().value); // Ensure full re-draw
+    
+        // Reset X-axis and update the chart
+        xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+        updateChart(dropdown.node().value);
+    
+        // Clear the brush selection completely
+        svg.select(".brush").call(brush.move, null);
     });
-
+    
     // Ensure the dropdown correctly updates everything
     dropdown.on("change", function() {
         const selectedMouse = this.value;
@@ -181,36 +220,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Default selection (first mouse)
     updateChart(uniqueMice[0]);
+    
+    // Move the brush to the top so it's above other elements
+    brushGroup.raise();
 
-    // Append brush *before* drawing the data
-    const brushGroup = svg.append("g")
-        .attr("class", "brush")
-        .style("cursor", "crosshair");
-
-    // Add brush interaction
-    const brush = d3.brushX()
-        .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
-        .on("start", function () { 
-            brushGroup.style("display", "block");
-        })
-        .on("brush", function(event) { 
-            brushGroup.style("display", "block");
-        })
-        .on("end", (event) => {
-            const selection = event.selection;
-            if (!selection) return;
-
-            // Convert selection from pixel space to data domain
-            zoomedRange = selection.map(xScale.invert);
-
-            // Update the domain
-            xScale.domain(zoomedRange);
-
-            // Re-draw everything
-            updateChart(dropdown.node().value);
-        });
-
-    // Apply the brush to the brush group
-    brushGroup.call(brush);
-
+    
 });

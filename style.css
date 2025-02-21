@@ -23,5 +23,21 @@ body {
 .brush {
     fill: none;
     pointer-events: all;
-    cursor: crosshair !important; 
+}
+
+.brush .overlay {
+    cursor: crosshair !important;
+    pointer-events: all;
+}
+
+.brush .selection {
+    fill: rgba(0, 0, 255, 0.2); /* Slightly lighter blue for better visibility */
+    stroke: none;
+    pointer-events: all;
+}
+
+/* Ensure the brush is always clickable */
+svg .brush {
+    z-index: 10;
+    position: relative;
 }
