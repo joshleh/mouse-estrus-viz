@@ -182,36 +182,38 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         })
         .on("end", function(event) {
             console.log("Brush event triggered");
-
+        
             const selection = event.selection;
             if (!selection) {
                 console.log("No selection made, returning...");
                 return;
             }
-
+        
             // Convert selection from pixel space to data domain
             zoomedRange = selection.map(xScale.invert);
             console.log("New zoom range:", zoomedRange);
-
+        
             // Update xScale domain
             xScale.domain(zoomedRange);
-
+        
             // Remove old shading before updating zoom
             svg.selectAll(".night-shading").remove();
-
+        
             // Update X-axis and ensure shading is updated afterward
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    console.log("X-axis transition complete, calling updateShading()");
+                    console.log("X-axis transition complete, calling updateShading() & updateChart()");
                     updateShading();
+                    updateChart(dropdown.node().value);  // 🔹 Ensure data updates after zooming
                 });
-
-            // Extra safeguard: Force `updateShading()` even if transition fails
+        
+            // Extra safeguard: Force `updateShading()` & `updateChart()` even if transition fails
             setTimeout(() => {
-                console.log("Force-calling updateShading() after timeout");
+                console.log("Force-calling updateShading() and updateChart() after timeout");
                 updateShading();
+                updateChart(dropdown.node().value);
             }, 600);
-
+        
             // Hide the brush after zooming is applied
             d3.select(".brush").call(brush.move, null);
         });
