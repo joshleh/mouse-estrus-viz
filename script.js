@@ -23,11 +23,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
-    // Append background shading for each night period
     function updateShading() {
-        // Ensure all previous shading is fully removed
-        svg.selectAll(".night-shading").transition().duration(100).style("opacity", 0).remove();
-
+        // Remove all previous shading elements
+        svg.selectAll(".night-shading").remove();
+    
         const dayLength = 1440; // Minutes in a day
         const numDays = Math.ceil(d3.max(data, d => d.day) / dayLength);
     
@@ -35,13 +34,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             const nightStart = i * dayLength + 720; // Night starts at 720 minutes
             const nightEnd = (i + 1) * dayLength;
     
-            // Remove previous shading before updating
-            svg.selectAll(".night-shading").remove(); 
-
             // Ensure shading is only drawn within the zoomed range
             const clippedNightStart = Math.max(nightStart, xScale.domain()[0]);
             const clippedNightEnd = Math.min(nightEnd, xScale.domain()[1]);
-
+    
             if (clippedNightStart < clippedNightEnd) {
                 svg.append("rect")
                     .attr("class", "night-shading")
@@ -49,8 +45,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     .attr("y", margin.top)
                     .attr("width", Math.max(0, xScale(clippedNightEnd) - xScale(clippedNightStart)))
                     .attr("height", height - margin.bottom - margin.top)
-                    .attr("fill", "lightgray")
-                    .attr("opacity", 0.3);
+                    .attr("fill", "rgba(169, 169, 169, 0.4)")  // Light gray with transparency
+                    .attr("opacity", 0.4);
             }
         }
     }
@@ -302,8 +298,12 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         updateChart(selectedMouse);
     });
     
-    // Default selection (first mouse)
-    updateChart(uniqueMice[0]);
+    // Ensure the chart starts with full data range
+    zoomedRange = d3.extent(data, d => d.day);
+    updateChart();
+    xScale.domain(zoomedRange);
+    xAxis.call(d3.axisBottom(xScale));
+
     
     // Move the brush to the top so it's above other elements
     brushGroup.raise();
