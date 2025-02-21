@@ -23,8 +23,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
-    function updateShading(zoomRange = xScale.domain()) {
-        svg.selectAll(".night-shading").remove(); // Clear previous shading
+    function updateShading() {
+        const zoomRange = xScale.domain(); // Always get the latest zoom range
+        svg.selectAll(".night-shading").remove();
     
         const dayLength = 1440; // Minutes in a day
         const numDays = Math.ceil(d3.max(data, d => d.day) / dayLength);
@@ -94,8 +95,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    updateShading(xScale.domain()); // Properly update shading after zoom
+                    setTimeout(() => updateShading(), 100); // Small delay ensures xScale is fully updated
                 });
+        
 
 
             if (selection) {
@@ -301,7 +303,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     
         updateChart(selectedMouse);
     
-        setTimeout(() => updateShading(xScale.domain()), 50); // Ensure shading updates after switching
+        setTimeout(() => updateShading(), 100); // Small delay ensures proper update
     });    
     
     // Ensure the first mouse loads correctly
@@ -310,7 +312,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     updateChart(firstMouse);
     xScale.domain(zoomedRange);
     xAxis.call(d3.axisBottom(xScale));
-    updateShading(xScale.domain()); // Ensure shading updates on first load    
+    setTimeout(() => updateShading(), 100); // Ensure shading updates on first load
     
     // Move the brush to the top so it's above other elements
     brushGroup.raise();
