@@ -92,8 +92,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                 xAxis.transition().duration(500).call(d3.axisBottom(xScale));
             }, 100);
 
-            // Update night shading dynamically
-            updateShading();
+            svg.selectAll(".night-shading").remove(); // Clear previous shading
+            updateShading(); // Apply updated shading
+
 
             // Update chart with zoomed data
             updateChart(dropdown.node().value);
@@ -203,14 +204,22 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     function updateChart(selectedMouse) {
         const filteredData = data.filter(d => d.mouse === selectedMouse);
         
-        // Fully reset zoom & brush selection
-        zoomedRange = null;  
+        if (!zoomedRange) { 
+            xScale.domain(d3.extent(filteredData, d => d.day));
+        } else { 
+            xScale.domain(zoomedRange);
+        }
+                
+        // Fully reset zoom & brush selection  
         xScale.domain(d3.extent(filteredData, d => d.day));
         yScale.domain([d3.min(filteredData, d => d.temp) - 0.5, d3.max(filteredData, d => d.temp) + 0.5]);
+        
+        // Update axes BEFORE drawing new data
+        xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+        yAxis.transition().duration(500).call(d3.axisLeft(yScale));
 
         // Remove old line and circles
         svg.selectAll(".line").remove();
-        svg.selectAll("circle").remove();
     
         // Re-draw line
         svg.append("path")
@@ -221,6 +230,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             .attr("class", "line")
             .attr("d", line);
     
+        // Remove old data points
+        svg.selectAll("circle").remove();
+
         // Re-draw circles
         svg.selectAll("circle")
             .data(filteredData)
@@ -243,14 +255,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         // Clear old shading and redraw night/day shading
         svg.selectAll(".night-shading").remove();
         updateShading();
-            
-        // Smoothly update axes
-        xAxis.transition().duration(500).call(d3.axisBottom(xScale));
-        yAxis.transition().duration(500).call(d3.axisLeft(yScale));
     
-        setTimeout(() => {
-            svg.select(".brush").transition().duration(500).call(brush.move, null);
-        }, 300);
+        svg.select(".brush").call(brush.move, null);
     }
     
     svg.on("dblclick", function () {
@@ -273,12 +279,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         // Clear all previous night/day shading before updating chart
         svg.selectAll(".night-shading").remove();
 
-        // Ensure the brush resets before updating the chart
-        svg.select(".brush").call(brush.move, null);
-    
-        // Properly update xScale before re-rendering
-        const filteredData = data.filter(d => d.mouse === selectedMouse);
-        xScale.domain(d3.extent(filteredData, d => d.day));
+        // Reset brush selection
+        svg.selectAll(".brush").call(brush.move, null);
     
         updateChart(selectedMouse);
     });
