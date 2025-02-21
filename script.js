@@ -172,6 +172,8 @@ d3.csv("data/mouse_data.csv").then(function(data) {
     //         xAxis.transition().duration(500).call(d3.axisBottom(xScale));
     //     });
 
+    ///
+    
     const brush = d3.brushX()
         .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
         .on("start", function () { 
@@ -193,7 +195,6 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             zoomedRange = selection.map(xScale.invert);
             console.log("New zoom range:", zoomedRange);
         
-            // Update xScale domain
             xScale.domain(zoomedRange);
         
             // Remove old shading before updating zoom
@@ -202,23 +203,63 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             // Update X-axis and ensure shading is updated afterward
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    console.log("X-axis transition complete, calling updateShading() & updateChart()");
-                    updateShading();
-                    updateChart(dropdown.node().value);  // 🔹 Ensure data updates after zooming
+                    console.log("X-axis transition complete, calling updateShading()");
+                    updateShading();  // Ensures shading updates after zoom
                 });
         
-            // Extra safeguard: Force `updateShading()` & `updateChart()` even if transition fails
+            // Extra safeguard: Force updateShading even if transition fails
             setTimeout(() => {
-                console.log("Force-calling updateShading() and updateChart() after timeout");
+                console.log("Force-calling updateShading() after timeout");
                 updateShading();
-                updateChart(dropdown.node().value);
             }, 600);
         
             // Hide the brush after zooming is applied
             d3.select(".brush").call(brush.move, null);
         });
-
     
+        if (selection) {
+            zoomedRange = selection.map(xScale.invert);
+        } else {
+            zoomedRange = d3.extent(data, d => d.day);
+        }
+
+        xScale.domain(zoomedRange);
+
+        const selectedMouse = dropdown.node().value;
+
+        // Ensure xScale domain is updated before filtering data
+        const newFilteredData = data.filter(d => 
+            d.mouse === selectedMouse &&
+            d.day >= zoomedRange[0] && d.day <= zoomedRange[1]
+        );
+
+        // Remove old line and circles
+        svg.selectAll(".line").remove();
+        svg.selectAll("circle").remove();
+
+        // Re-draw line with updated data
+        svg.append("path")
+            .datum(newFilteredData)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 2)
+            .attr("class", "line")
+            .attr("d", line);
+
+        // Re-draw circles with updated data
+        svg.selectAll("circle")
+            .data(newFilteredData)
+            .enter().append("circle")
+            .attr("cx", d => xScale(d.day))
+            .attr("cy", d => yScale(d.temp))
+            .attr("r", 2)
+            .attr("fill", "red");
+
+        // Update X-axis immediately
+        xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+    });
+    
+    ///
     window.updateShading = updateShading;
 
     // Now append the brush AFTER defining it
