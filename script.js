@@ -76,7 +76,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .on("brush", function(event) { 
             d3.select(".brush").style("display", "block");
         })
-        .on("end", (event) => {
+        .on("end", function(event) {
             console.log("Brush event triggered");
         
             const selection = event.selection;
@@ -85,20 +85,17 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                 return;
             }
         
-            // Hide brush selection after zooming is applied
-            d3.select(".brush").call(brush.move, null);
-        
             // Convert selection from pixel space to data domain
             zoomedRange = selection.map(xScale.invert);
             console.log("New zoom range:", zoomedRange);
         
-            // Update the domain
+            // Update xScale domain
             xScale.domain(zoomedRange);
         
             // Remove old shading before updating zoom
             svg.selectAll(".night-shading").remove();
         
-            // Update X-axis and ensure shading is updated afterward
+            // Update X-axis and ensure shading & data update afterward
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
                     console.log("X-axis transition complete, calling updateShading() and updateChart()");
@@ -113,38 +110,10 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                 updateChart(dropdown.node().value);
             }, 600);
         
-            // Ensure xScale domain is updated before filtering data
-            const selectedMouse = dropdown.node().value;
-            const newFilteredData = data.filter(d => 
-                d.mouse === selectedMouse &&
-                d.day >= zoomedRange[0] && d.day <= zoomedRange[1]
-            );
-        
-            // Remove old line and circles
-            svg.selectAll(".line").remove();
-            svg.selectAll("circle").remove();
-        
-            // Re-draw line with updated data
-            svg.append("path")
-                .datum(newFilteredData)
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 2)
-                .attr("class", "line")
-                .attr("d", line);
-        
-            // Re-draw circles with updated data
-            svg.selectAll("circle")
-                .data(newFilteredData)
-                .enter().append("circle")
-                .attr("cx", d => xScale(d.day))
-                .attr("cy", d => yScale(d.temp))
-                .attr("r", 2)
-                .attr("fill", "red");
-        
-            // Update X-axis immediately
-            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+            // DO NOT clear the brush selection immediately
+            // Remove this line: d3.select(".brush").call(brush.move, null);
         });
+        
         
         // .on("end", (event) => {
         //     const selection = event.selection;
