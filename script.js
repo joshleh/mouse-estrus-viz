@@ -23,10 +23,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
 
-    function updateShading(zoomRange) {
-        if (!zoomRange) zoomRange = xScale.domain(); // Ensure it always has a valid range
-        svg.selectAll(".night-shading").remove();
-        
+    function updateShading(zoomRange = xScale.domain()) {
+        svg.selectAll(".night-shading").remove(); // Clear previous shading
+    
         const dayLength = 1440; // Minutes in a day
         const numDays = Math.ceil(d3.max(data, d => d.day) / dayLength);
     
@@ -35,17 +34,14 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             const nightEnd = (i + 1) * dayLength;
     
             // Ensure shading is only drawn within the zoomed range
-            const clippedNightStart = Math.max(nightStart, zoomRange[0]);
-            const clippedNightEnd = Math.min(nightEnd, zoomRange[1]);
-    
-            if (clippedNightStart < clippedNightEnd) {
+            if (nightEnd >= zoomRange[0] && nightStart <= zoomRange[1]) {
                 svg.append("rect")
                     .attr("class", "night-shading")
-                    .attr("x", xScale(clippedNightStart))
+                    .attr("x", xScale(Math.max(nightStart, zoomRange[0])))
                     .attr("y", margin.top)
-                    .attr("width", Math.max(0, xScale(clippedNightEnd) - xScale(clippedNightStart)))
+                    .attr("width", xScale(Math.min(nightEnd, zoomRange[1])) - xScale(Math.max(nightStart, zoomRange[0])))
                     .attr("height", height - margin.bottom - margin.top)
-                    .attr("fill", "rgba(30, 30, 30, 0.7)")  // Even darker for better contrast
+                    .attr("fill", "rgba(30, 30, 30, 0.7)")
                     .attr("opacity", 0.4);
             }
         }
@@ -98,9 +94,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
-                    svg.selectAll(".night-shading").remove(); // Remove old shading
-                    setTimeout(() => updateShading(xScale.domain()), 50); // Ensure shading updates AFTER zoom
+                    updateShading(xScale.domain()); // Properly update shading after zoom
                 });
+
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
