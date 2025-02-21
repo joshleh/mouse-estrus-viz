@@ -45,7 +45,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
                     .attr("y", margin.top)
                     .attr("width", Math.max(0, xScale(clippedNightEnd) - xScale(clippedNightStart)))
                     .attr("height", height - margin.bottom - margin.top)
-                    .attr("fill", "rgba(50, 50, 50, 0.6)")  // Darker gray for better contrast
+                    .attr("fill", "rgba(30, 30, 30, 0.7)")  // Even darker for better contrast
                     .attr("opacity", 0.4);
             }
         }
@@ -98,8 +98,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             xAxis.transition().duration(500).call(d3.axisBottom(xScale))
                 .on("end", function() {
                     svg.selectAll(".night-shading").remove(); // Remove old shading
-                    updateShading(); // Re-add updated shading
+                    setTimeout(updateShading, 300); // Delay shading update for smoother transition
                 });
+        
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
@@ -149,7 +150,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Add Legend
     const legend = svg.append("g")
-        .attr("transform", `translate(${width - margin.right + 100}, ${margin.top + 50})`);
+        .attr("transform", `translate(${width - 120}, ${margin.top + 20})`); // Moves it closer
 
     // Nighttime color box (now matches darker shading)
     legend.append("rect")
@@ -161,16 +162,16 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("opacity", 1);
 
     legend.append("text")
-        .attr("x", 30)
-        .attr("y", 15)
-        .style("font-size", "16px")
+        .attr("x", 25)
+        .attr("y", 14)
+        .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("Nighttime");
     
     legend.append("text")
-        .attr("x", 30)
-        .attr("y", 45) // Adjusted spacing
-        .style("font-size", "16px")
+        .attr("x", 25)
+        .attr("y", 40)
+        .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("Daytime");
 
