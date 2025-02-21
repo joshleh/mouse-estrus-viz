@@ -93,9 +93,9 @@ d3.csv("data/mouse_data.csv").then(function(data) {
             // Update X-axis immediately
             xAxis.transition().duration(500).call(d3.axisBottom(xScale));
 
-            // Remove old shading elements before updating
+            // Remove old shading elements and ensure updateShading runs AFTER x-axis update
             svg.selectAll(".night-shading").remove();
-            updateShading();
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale)).on("end", updateShading);
 
             if (selection) {
                 zoomedRange = selection.map(xScale.invert);
@@ -145,8 +145,7 @@ d3.csv("data/mouse_data.csv").then(function(data) {
 
     // Add Legend
     const legend = svg.append("g")
-        .attr("transform", `translate(${width - margin.right + 50}, ${margin.top + 50})`);
-
+        .attr("transform", `translate(${width - margin.right + 70}, ${margin.top + 70})`);
 
     // Nighttime color box (now matches darker shading)
     legend.append("rect")
@@ -158,16 +157,16 @@ d3.csv("data/mouse_data.csv").then(function(data) {
         .attr("opacity", 1);
 
     legend.append("text")
-        .attr("x", 30)
-        .attr("y", 15)
-        .style("font-size", "14px")
+        .attr("x", 35)
+        .attr("y", 18)
+        .style("font-size", "16px")
         .style("font-weight", "bold")
         .text("Nighttime");
     
     legend.append("text")
-        .attr("x", 30)
-        .attr("y", 55) // Increased spacing for better readability
-        .style("font-size", "14px")
+        .attr("x", 35)
+        .attr("y", 60) // Increased spacing for better readability
+        .style("font-size", "16px")
         .style("font-weight", "bold")
         .text("Daytime");
 
